@@ -1,13 +1,16 @@
 # Enable the rewrite engine
 RewriteEngine On
 
-# Force HTTPS: Redirect HTTP requests to HTTPS
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# OPTIONAL: Force HTTPS (uncomment the following lines if you want to enforce HTTPS)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Redirect www to non-www (optional)
-RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
-RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+# Set the default index file to index.html
+DirectoryIndex index.html
+
+# Redirect requests for the root URL to /index.html
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^$ /index.html [L,R=301]
 
 # Deny access to sensitive files
 <FilesMatch "\.(htaccess|htpasswd|ini|log|conf)$">
@@ -15,26 +18,5 @@ RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
     Deny from all
 </FilesMatch>
 
-# Set caching headers for static content (requires mod_expires)
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType image/jpg "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/gif "access plus 1 month"
-    ExpiresByType image/png "access plus 1 month"
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-</IfModule>
-
-# Custom error pages
-ErrorDocument 404 /error/404.html
-ErrorDocument 500 /error/500.html
-
 # Prevent directory listing
 Options -Indexes
-
-# Rewrite for clean URLs:
-# If the requested file or directory doesn't exist, route the request to index.php
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]
